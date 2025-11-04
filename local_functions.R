@@ -19,7 +19,8 @@ generate_cov2dataset = function(p1, p2, r1, r2, r12,
   diag(R2) = 1
   R12 = matrix(r12, nrow = p1, ncol = p2)
   
-  R = rbind( cbind(R1, R12), cbind(t(R12), R2) )
+  R = rbind( cbind(R1, R12), 
+             cbind(t(R12), R2) )
   
   # Generate variances
   s1 = runif(p1, s1_min, s1_max)
@@ -27,6 +28,49 @@ generate_cov2dataset = function(p1, p2, r1, r2, r12,
   
   # Create the covariance matrix and return it
   Cov_m = R * outer(c(s1, s2), c(s1, s2))
+  
+  # Make sure its is positive definite
+  eigs = eigen(Cov_m)
+  if(any(eigs$values < 0)){
+    cat("Warning: covariance matrix is not positive definite. \n")
+  }
+  eigs$values[eigs$values < 0] = 0
+  Cov_m = eigs$vectors %*% diag(eigs$values) %*% t(eigs$vectors)
+  
+  return(Cov_m)
+}
+
+# --------------------------------------------
+# Generate the covariance matrix 
+# for 3 sets of variables 
+# --------------------------------------------
+
+generate_cov3dataset = function(p1, p2, p3, r1, r2, r3, r12, r13, r23,
+                                s1_min=0, s1_max=1, s2_min=0, s2_max=1,
+                                s3_min=0, s3_max=1){
+  
+  # Create correlation matrix
+  R1 = matrix(r1, nrow = p1, ncol = p1)
+  diag(R1) = 1
+  R2 = matrix(r2, nrow = p2, ncol = p2)
+  diag(R2) = 1
+  R3 = matrix(r3, nrow = p3, ncol = p3)
+  diag(R3) = 1
+  R12 = matrix(r12, nrow = p1, ncol = p2)
+  R13 = matrix(r13, nrow = p1, ncol = p3)
+  R23 = matrix(r23, nrow = p2, ncol = p3)
+  
+  R = rbind( cbind(R1, R12, R13), 
+             cbind(t(R12), R2, R23), 
+             cbind(t(R13), t(R23), R3) )
+  
+  # Generate variances
+  s1 = runif(p1, s1_min, s1_max)
+  s2 = runif(p2, s2_min, s2_max)
+  s3 = runif(p3, s3_min, s3_max)
+  
+  # Create the covariance matrix and return it
+  Cov_m = R * outer(c(s1, s2, s3), c(s1, s2, s3))
   
   # Make sure its is positive definite
   eigs = eigen(Cov_m)
