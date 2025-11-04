@@ -1,6 +1,6 @@
 # ----------------------------------------------------
 # ----------------------------------------------------
-# Test the simulated data generation process
+# Compute CV and moments for 2 sets of variables
 # ----------------------------------------------------
 # ----------------------------------------------------
 
@@ -10,6 +10,8 @@
 
 source("local_functions.R")
 library(MASS)
+library(parallel)
+library(tidyverse)
 
 # -------------------------------------------------
 # Parameters for the experiment
@@ -17,50 +19,81 @@ library(MASS)
 
 set.seed(1234)
 n = 500
-p1 = 5
-p2 = 5
-r1 = 0.6
-r2 = 0.6
-r12 = 0.1
+p1 = 10
+p2 = 10
+n_test_out = 10
+n_test_in = 50
+r1 = 0.5
+r2 = 0.5
+r12_vec = seq(0, 1, 0.1)
+n_cores = detectCores() - 2
 
 # -------------------------------------------------
 # Code
 # -------------------------------------------------
 
-### Create the fixed quantities
+df_all_res = data.frame()
 
-# Create the weights 
-f = runif(n)
-f = f/sum(f)
-
-# The diagonal matrix of weights
-Pi = diag(f)
-
-# The centering matrix
-H = diag(n) - outer(rep(1, n), f)
+# Function to compute 
+cv_results = function(n, p1, p2, Sigma, Pi_sqrt, H){
+  # Generate the dataset
+  data_sim = mvrnorm(n = n, mu = rep(0, p1+p2), Sigma = Sigma)
+  
+  # Split the dataset
+  X = data_sim[, 1:p1]
+  Y = data_sim[, (p1+1):(p1+p2)]
+  
+  # Compute the euclidean squared dissimilarity matrices 
+  D_X = as.matrix(dist(X))^2
+  D_Y = as.matrix(dist(Y))^2
+  
+  # Compute the kernels
+  K_X = -0.5 * Pi_sqrt %*% H %*% D_X %*% t(H) %*% Pi_sqrt
+  K_Y = -0.5 * Pi_sqrt %*% H %*% D_X %*% t(H) %*% Pi_sqrt
+  
+  # Compute the cross-covariance and theoretical moments
+  CV_res = compute_CV(K_X, K_Y)
+  
+  return(CV_res)
+}
 
 ### Computations
 
-# Create the covariance matrix
-Cov_mat = generate_cov2dataset(p1, p2, r1, r2, r12)
+for(r12 in r12_vec){
+  cat("Running for r12 =", r12, "\n")
+  for(i in 1:n_test_out){
+    # Create the weights 
+    f = runif(n)
+    f = f/sum(f)
+    
+    # The diagonal matrix of weights and the sqrt
+    Pi = diag(f)
+    Pi_sqrt = diag(sqrt(f))
+    
+    # The centering matrix
+    H = diag(n) - outer(rep(1, n), f)
+    
+    # Create the covariance matrix
+    Cov_mat = generate_cov2dataset(p1, p2, r1, r2, r12)
+    
+    res = mclapply(1:n_test_in, 
+                   function(x) cv_results(n, p1, p2, Cov_mat, Pi_sqrt, H), 
+                   mc.cores=n_cores)
+    
+    df_res = as_tibble(apply(t(simplify2array(res)), 2, unlist))
+    df_res = df_res %>%
+      mutate(n=n,
+             p1=p1,
+             p2=p2,
+             r1=r1,
+             r2=r2,
+             r12=r12)
+    
+    df_all_res = rbind(df_all_res, df_res)
+  }
+}
 
-# Generate the dataset
-data_sim = mvrnorm(n = n, mu = rep(0, 10), Sigma = Cov_mat)
-
-# Split the dataset
-X = data_sim[, 1:p1]
-Y = data_sim[, (p1+1):(p1+p2)]
-
-
-# Compute the kernels 
-X_s = sqrt(f)*t(t(X) - colSums(f*X))
-K_X = 0.5 * X_s %*% t(X_s)
-Y_s = sqrt(f)*t(t(Y) - colSums(f*Y))
-K_Y = 0.5 * Y_s %*% t(Y_s)
-
-
-
-
-
+# Save the results
+write_csv(df_all_res, "results_csv/cv_5_5.csv")
 
 
