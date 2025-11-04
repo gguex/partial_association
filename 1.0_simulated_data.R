@@ -22,17 +22,14 @@ n = 500
 p1 = 10
 p2 = 10
 n_test_out = 10
-n_test_in = 50
-r1 = 0.5
-r2 = 0.5
+n_test_in = 100
+rw_vec = seq(0, 1, 0.1)
 r12_vec = seq(0, 1, 0.1)
 n_cores = detectCores() - 2
 
 # -------------------------------------------------
 # Code
 # -------------------------------------------------
-
-df_all_res = data.frame()
 
 # Function to compute 
 cv_results = function(n, p1, p2, Sigma, Pi_sqrt, H){
@@ -57,43 +54,50 @@ cv_results = function(n, p1, p2, Sigma, Pi_sqrt, H){
   return(CV_res)
 }
 
-### Computations
-
-for(r12 in r12_vec){
-  cat("Running for r12 =", r12, "\n")
-  for(i in 1:n_test_out){
-    # Create the weights 
-    f = runif(n)
-    f = f/sum(f)
-    
-    # The diagonal matrix of weights and the sqrt
-    Pi = diag(f)
-    Pi_sqrt = diag(sqrt(f))
-    
-    # The centering matrix
-    H = diag(n) - outer(rep(1, n), f)
-    
-    # Create the covariance matrix
-    Cov_mat = generate_cov2dataset(p1, p2, r1, r2, r12)
-    
-    res = mclapply(1:n_test_in, 
-                   function(x) cv_results(n, p1, p2, Cov_mat, Pi_sqrt, H), 
-                   mc.cores=n_cores)
-    
-    df_res = as_tibble(apply(t(simplify2array(res)), 2, unlist))
-    df_res = df_res %>%
-      mutate(n=n,
-             p1=p1,
-             p2=p2,
-             r1=r1,
-             r2=r2,
-             r12=r12)
-    
-    df_all_res = rbind(df_all_res, df_res)
+for(r_w in rw_vec){
+  cat("Running for rw =", r_w, "\n")
+  r1 = r_w
+  r2 = r_w
+  
+  df_all_res = data.frame()
+  
+  ### Computations
+  
+  for(r12 in r12_vec){
+    cat("Running for r12 =", r12, "\n")
+    for(i in 1:n_test_out){
+      # Create the weights 
+      f = runif(n)
+      f = f/sum(f)
+      
+      # The diagonal matrix of weights and the sqrt
+      Pi = diag(f)
+      Pi_sqrt = diag(sqrt(f))
+      
+      # The centering matrix
+      H = diag(n) - outer(rep(1, n), f)
+      
+      # Create the covariance matrix
+      Cov_mat = generate_cov2dataset(p1, p2, r1, r2, r12)
+      
+      res = mclapply(1:n_test_in, 
+                     function(x) cv_results(n, p1, p2, Cov_mat, Pi_sqrt, H), 
+                     mc.cores=n_cores)
+      
+      df_res = as_tibble(apply(t(simplify2array(res)), 2, unlist))
+      df_res = df_res %>%
+        mutate(n=n,
+               p1=p1,
+               p2=p2,
+               r1=r1,
+               r2=r2,
+               r12=r12)
+      
+      df_all_res = rbind(df_all_res, df_res)
+    }
   }
+  
+  # Save the results
+  write_csv(df_all_res, paste0("results_csv/results_rw_", r_w, ".csv"))
 }
-
-# Save the results
-write_csv(df_all_res, "results_csv/cv_5.csv")
-
 

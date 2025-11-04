@@ -8,8 +8,8 @@ library(tidyverse)
 
 # --- Parameters
 
-
-results_path = "results_csv/results_rw_0.5.csv"
+r_w = 0.5
+results_path = paste0("results_csv/results_rw_", r_w, ".csv")
 
 # --- Plot
 
@@ -37,8 +37,8 @@ ggplot(summ_df) +
               alpha = 0.2, fill="red") +
   labs(x = bquote("Correlation between datasets ("~r[b]~")"), 
        y = "Dissimilariy Covariance", 
-       title = bquote("Dissimilarity Covariance (with"~r[w]~"= 0.5)")) +
-  scale_color_manual(values = c("Empirical C" = "blue", "Theoretical C" = "red")) +
+       title = bquote("Dissimilarity Covariance (with"~r[w]~"= "~.(r_w)~")")) +
+  scale_color_manual(values = c("Empirical Cov" = "blue", "Theoretical Cov" = "red")) +
   theme_minimal() +
   theme(legend.title=element_blank())
 
