@@ -32,7 +32,7 @@ n_cores = detectCores() - 2
 # -------------------------------------------------
 
 # Function to compute 
-cv_results = function(n, p1, p2, Sigma, Pi_sqrt, H){
+c_results = function(n, p1, p2, Sigma, Pi_sqrt, H){
   # Generate the dataset
   data_sim = mvrnorm(n = n, mu = rep(0, p1+p2), Sigma = Sigma)
   
@@ -49,9 +49,9 @@ cv_results = function(n, p1, p2, Sigma, Pi_sqrt, H){
   K_Y = -0.5 * Pi_sqrt %*% H %*% D_X %*% t(H) %*% Pi_sqrt
   
   # Compute the cross-covariance and theoretical moments
-  CV_res = compute_CV(K_X, K_Y)
+  C_res = compute_C(K_X, K_Y)
   
-  return(CV_res)
+  return(C_res)
 }
 
 for(r_w in rw_vec){
@@ -81,7 +81,7 @@ for(r_w in rw_vec){
       Cov_mat = generate_cov2dataset(p1, p2, r1, r2, r12)
       
       res = mclapply(1:n_test_in, 
-                     function(x) cv_results(n, p1, p2, Cov_mat, Pi_sqrt, H), 
+                     function(x) c_results(n, p1, p2, Cov_mat, Pi_sqrt, H), 
                      mc.cores=n_cores)
       
       df_res = as_tibble(apply(t(simplify2array(res)), 2, unlist))
