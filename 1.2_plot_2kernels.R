@@ -1,6 +1,6 @@
 # ----------------------------------------------------
 # ----------------------------------------------------
-# Plot the results for 2 variables
+# Plot the results for 2 kernels
 # ----------------------------------------------------
 # ----------------------------------------------------
 
@@ -31,13 +31,12 @@ df_g1 = df %>%
 z_means = df_g1 %>%
   group_by(r1) %>%
   summarise(mean_z = mean(z_score)) %>%
-  ungroup() %>%
-  .$mean_z
+  ungroup()
 
 df_g1 %>%
   ggplot(aes(x=z_score)) +
   geom_histogram(aes(y=..density..), bins=30, fill="lightblue", color="black") +
-  geom_vline(data=data.frame(r1=unique(df_g1$r1), mean_z=z_means), 
+  geom_vline(data=z_means, 
              aes(xintercept=mean_z), color="red", linetype="dashed", size=1) +
   labs(x = "z-score of Dissimilarity Covariance", 
        y = "Density", 
