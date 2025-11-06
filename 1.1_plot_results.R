@@ -8,22 +8,30 @@ library(tidyverse)
 
 # --- Parameters
 
-r_w = 0.5
-results_path = paste0("results_csv/results_rw_", r_w, ".csv")
+r_w_v = seq(0, 1, 0.1)
 
-# --- Plot
+# --- Load data
 
-df = read_csv(results_path) 
+df = data.frame()
+
+for(r_w in r_w_v){
+  results_path = paste0("results_csv/results_rw_", r_w, ".csv")
+  temp_df = read_csv(results_path) 
+  df = rbind(df, temp_df)
+}
+
+# --- Summarise data
 
 summ_df = df %>% 
-  group_by(r12) %>%
+  group_by(r1, r12) %>%
   summarise(n = n(),
             mean_C = mean(C_XY),
             sd_C = sd(C_XY),
             mean_C_th = mean(E_C_XY),
             sd_C_th = sd(Var_C_XY))
 
-# Plot the two curves with confidence intervals
+# --- Plot the two curves with confidence intervals
+
 ggplot(summ_df) +
   geom_line(aes(x = r12, y = mean_C, color = bquote("Empirical Cov")), size=1) +
   geom_ribbon(aes(x = r12, 
@@ -37,8 +45,9 @@ ggplot(summ_df) +
               alpha = 0.2, fill="red") +
   labs(x = bquote("Correlation between datasets ("~r[b]~")"), 
        y = "Dissimilariy Covariance", 
-       title = bquote("Dissimilarity Covariance (with"~r[w]~"= "~.(r_w)~")")) +
+       title = "Dissimilarity Covariance") +
   scale_color_manual(values = c("Empirical Cov" = "blue", "Theoretical Cov" = "red")) +
+  facet_wrap(~r1, labeller = labeller(r1 = function(x) bquote(r[w]~"= "~.(x)))) +
   theme_minimal() +
   theme(legend.title=element_blank())
 
