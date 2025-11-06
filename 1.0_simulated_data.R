@@ -19,13 +19,13 @@ library(tidyverse)
 
 set.seed(1234)
 n = 500
-p1 = 10
-p2 = 10
+p1 = 5
+p2 = 5
 n_test_out = 10
 n_test_in = 100
 rw_vec = seq(0, 1, 0.1)
 r12_vec = seq(0, 1, 0.1)
-n_cores = detectCores() - 2
+n_cores = detectCores()
 
 # -------------------------------------------------
 # Code
@@ -46,7 +46,7 @@ c_results = function(n, p1, p2, Sigma, Pi_sqrt, H){
   
   # Compute the kernels
   K_X = -0.5 * Pi_sqrt %*% H %*% D_X %*% t(H) %*% Pi_sqrt
-  K_Y = -0.5 * Pi_sqrt %*% H %*% D_X %*% t(H) %*% Pi_sqrt
+  K_Y = -0.5 * Pi_sqrt %*% H %*% D_Y %*% t(H) %*% Pi_sqrt
   
   # Compute the cross-covariance and theoretical moments
   C_res = compute_C(K_X, K_Y)
@@ -78,10 +78,10 @@ for(r_w in rw_vec){
       H = diag(n) - outer(rep(1, n), f)
       
       # Create the covariance matrix
-      Cov_mat = generate_cov2dataset(p1, p2, r1, r2, r12)
+      R_mat = gen_cor_2datasets(p1, p2, r1, r2, r12)
       
       res = mclapply(1:n_test_in, 
-                     function(x) c_results(n, p1, p2, Cov_mat, Pi_sqrt, H), 
+                     function(x) c_results(n, p1, p2, R_mat, Pi_sqrt, H), 
                      mc.cores=n_cores)
       
       df_res = as_tibble(apply(t(simplify2array(res)), 2, unlist))
