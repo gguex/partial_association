@@ -11,7 +11,7 @@
 source("local_functions.R")
 library(MASS)
 library(parallel)
-library(tidyverse)
+
 job_id = as.numeric(commandArgs(trailingOnly=TRUE)[1])
 n_cores = detectCores()
 
@@ -100,6 +100,7 @@ for(r12 in r12_vec){
 }
 
 # Save the results
-write_csv(df_all_res, paste0("results_csv/results_rw_", r_w, ".csv"))
+write.csv(df_all_res, paste0("results_csv/results_rw_", r_w, ".csv"), 
+          row.names=F)
 
 
