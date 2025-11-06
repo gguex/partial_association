@@ -45,12 +45,11 @@ ggplot(summ_df) +
               alpha = 0.2, fill="red") +
   labs(x = bquote("Correlation between datasets ("~r[b]~")"), 
        y = "Dissimilariy Covariance", 
-       title = "Dissimilarity Covariance") +
+       title = "Dissimilarity Covariance between 2 Kernels") +
   scale_color_manual(values = c("Empirical Cov" = "blue", "Theoretical Cov" = "red")) +
-  facet_wrap(~r1, labeller = labeller(r1 = function(x) bquote(r[w]~"= "~.(x)))) +
-  theme_minimal() +
+  facet_wrap(~r1, labeller = labeller(r1 = function(x) paste0("r_w", "=", x) )) +
   theme(legend.title=element_blank())
-
+ggsave("results_plot/dissimilarity_covariance_2Kernels.png", width=8, height=6)
 
 
             
