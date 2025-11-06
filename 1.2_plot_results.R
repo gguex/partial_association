@@ -15,7 +15,7 @@ r_w_v = seq(0, 1, 0.1)
 df = data.frame()
 
 for(r_w in r_w_v){
-  results_path = paste0("results_csv/results_rw_", r_w, ".csv")
+  results_path = paste0("results_csv/res_2kernels_rw_", r_w, ".csv")
   temp_df = read_csv(results_path) 
   df = rbind(df, temp_df)
 }
