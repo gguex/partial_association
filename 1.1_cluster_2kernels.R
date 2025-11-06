@@ -86,14 +86,13 @@ for(r12 in r12_vec){
                    function(x) c_results(n, p1, p2, R_mat, Pi_sqrt, H), 
                    mc.cores=n_cores)
     
-    df_res = as_tibble(apply(t(simplify2array(res)), 2, unlist))
-    df_res = df_res %>%
-      mutate(n=n,
-             p1=p1,
-             p2=p2,
-             r1=r1,
-             r2=r2,
-             r12=r12)
+    df_res = as.data.frame(apply(t(simplify2array(res)), 2, unlist))
+    df_res$n = n
+    df_res$p1 = p1
+    df_res$p2 = p2
+    df_res$r1 = r1
+    df_res$r2 = r2
+    df_res$r12 = r12
     
     df_all_res = rbind(df_all_res, df_res)
   }
