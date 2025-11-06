@@ -21,24 +21,34 @@ n_cores = detectCores()
 
 set.seed(1234)
 
-r_w_vec = seq(0, 1, 0.1)
-r_w = r_w_vec[job_id+1]
+r_b_vec = seq(0, 1, 0.1)
+r_b = r_b_vec[job_id+1]
 
-n = 500
+n = 100
 p1 = 5
 p2 = 5
-n_test_out = 10
-n_test_in = 100
-r12_vec = seq(0, 1, 0.1)
+n_test = 1000
+r_w_vec = c(0, 0.5, 0.9)
 
 # -------------------------------------------------
 # Code
 # -------------------------------------------------
 
 # Function to compute 
-c_results = function(n, p1, p2, Sigma, Pi_sqrt, H){
+c_results = function(n, R_mat){
+  
+  # Create the weights 
+  f = runif(n)
+  f = f/sum(f)
+  
+  # The diagonal matrix of weights and the sqrt
+  Pi_sqrt = diag(sqrt(f))
+  
+  # The centering matrix
+  H = diag(n) - outer(rep(1, n), f)
+  
   # Generate the dataset
-  data_sim = mvrnorm(n = n, mu = rep(0, p1+p2), Sigma = Sigma)
+  data_sim = mvrnorm(n, mu=rep(0, p1+p2), Sigma=R_mat)
   
   # Split the dataset
   X = data_sim[, 1:p1]
@@ -58,49 +68,39 @@ c_results = function(n, p1, p2, Sigma, Pi_sqrt, H){
   return(C_res)
 }
 
-cat("Running for rw =", r_w, "\n")
-r1 = r_w
-r2 = r_w
+cat("Running for r_b =", r_b, "\n")
 
 df_all_res = data.frame()
 
 ### Computations
 
-for(r12 in r12_vec){
-  cat("Running for r12 =", r12, "\n")
-  for(i in 1:n_test_out){
-    # Create the weights 
-    f = runif(n)
-    f = f/sum(f)
-    
-    # The diagonal matrix of weights and the sqrt
-    Pi = diag(f)
-    Pi_sqrt = diag(sqrt(f))
-    
-    # The centering matrix
-    H = diag(n) - outer(rep(1, n), f)
-    
-    # Create the covariance matrix
-    R_mat = gen_cor_2datasets(p1, p2, r1, r2, r12)
-    
-    res = mclapply(1:n_test_in, 
-                   function(x) c_results(n, p1, p2, R_mat, Pi_sqrt, H), 
-                   mc.cores=n_cores)
-    
-    df_res = as.data.frame(apply(t(simplify2array(res)), 2, unlist))
-    df_res$n = n
-    df_res$p1 = p1
-    df_res$p2 = p2
-    df_res$r1 = r1
-    df_res$r2 = r2
-    df_res$r12 = r12
-    
-    df_all_res = rbind(df_all_res, df_res)
-  }
+for(r_w in r_w_vec){
+  
+  cat("Running for r_w =", r_w, "\n")
+  
+  # Create the covariance matrix
+  R_res = gen_cor_2datasets(p1, p2, r_w, r_w, r_b)
+  R_mat = R_res$R_mat
+  semipos_def = R_res$semidef
+  
+  res = mclapply(1:n_test, 
+                 function(x) c_results(n, R_mat), 
+                 mc.cores=n_cores)
+  
+  df_res = as.data.frame(apply(t(simplify2array(res)), 2, unlist))
+  df_res$n = n
+  df_res$p1 = p1
+  df_res$p2 = p2
+  df_res$r1 = r_w
+  df_res$r2 = r_w
+  df_res$r12 = r_b
+  df_res$semipos_def = 1*semipos_def
+  
+  df_all_res = rbind(df_all_res, df_res)
+  
 }
 
 # Save the results
-write.csv(df_all_res, paste0("results_csv/res_2kernels_rw_", r_w, ".csv"), 
+write.csv(df_all_res, paste0("results_csv/res_2kernels_rb_", r_b, ".csv"), 
           row.names=F)
-
 

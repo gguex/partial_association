@@ -19,18 +19,19 @@ gen_cor_2datasets = function(p1, p2, r1, r2, r12){
   R12 = matrix(r12, nrow = p1, ncol = p2)
   
   # The correlation matrix
-  R = rbind( cbind(R1, R12), 
+  R_mat = rbind( cbind(R1, R12), 
              cbind(t(R12), R2) )
   
   # Make sure its is positive definite
-  eigs = eigen(R)
+  semidef_pos = T
+  eigs = eigen(R_mat)
   if(any(eigs$values < 0)){
-    cat("Warning: the correlation matrix is not positive semi-definite. \n")
+    semidef_pos = F
+    eigs$values[eigs$values < 0] = 0
+    R_mat = eigs$vectors %*% diag(eigs$values) %*% t(eigs$vectors)
   }
-  eigs$values[eigs$values < 0] = 0
-  R = eigs$vectors %*% diag(eigs$values) %*% t(eigs$vectors)
   
-  return(R)
+  return(list(R_mat=R_mat, semidef_pos=semidef_pos))
 }
 
 # --------------------------------------------
@@ -51,19 +52,21 @@ gen_cor_3datasets = function(p1, p2, p3, r1, r2, r3, r12, r13, r23){
   R13 = matrix(r13, nrow = p1, ncol = p3)
   R23 = matrix(r23, nrow = p2, ncol = p3)
   
-  R = rbind( cbind(R1, R12, R13), 
-             cbind(t(R12), R2, R23), 
-             cbind(t(R13), t(R23), R3) )
+  R_mat = rbind(cbind(R1, R12, R13), 
+                cbind(t(R12), R2, R23), 
+                cbind(t(R13), t(R23), R3))
   
   # Make sure its is positive definite
-  eigs = eigen(R)
+  semidef_pos = T
+  eigs = eigen(R_mat)
   if(any(eigs$values < 0)){
-    cat("Warning: correlation matrix is not positive semi-definite. \n")
+    semidef_pos = F
+    eigs$values[eigs$values < 0] = 0
+    R_mat = eigs$vectors %*% diag(eigs$values) %*% t(eigs$vectors)
   }
-  eigs$values[eigs$values < 0] = 0
-  R = eigs$vectors %*% diag(eigs$values) %*% t(eigs$vectors)
   
-  return(R)
+  
+  return(list(R_mat=R_mat, semidef_pos=semidef_pos))
 }
 
 # -------------------------------------------------
