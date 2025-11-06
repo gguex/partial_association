@@ -99,7 +99,7 @@ for(r12 in r12_vec){
 }
 
 # Save the results
-write.csv(df_all_res, paste0("results_csv/results_rw_", r_w, ".csv"), 
+write.csv(df_all_res, paste0("results_csv/res_2kernels_rw_", r_w, ".csv"), 
           row.names=F)
 
 
