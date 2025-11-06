@@ -35,7 +35,7 @@ r_w_vec = c(0, 0.5, 0.9)
 # -------------------------------------------------
 
 # Function to compute 
-c_results = function(n, R_mat){
+c_results = function(n, p1, p2, R_mat){
   
   # Create the weights 
   f = runif(n)
@@ -84,7 +84,7 @@ for(r_w in r_w_vec){
   semipos_def = R_res$semidef
   
   res = mclapply(1:n_test, 
-                 function(x) c_results(n, R_mat), 
+                 function(x) c_results(n, p1, p2, R_mat), 
                  mc.cores=n_cores)
   
   df_res = as.data.frame(apply(t(simplify2array(res)), 2, unlist))
