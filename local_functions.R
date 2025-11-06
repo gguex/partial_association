@@ -25,7 +25,7 @@ gen_cor_2datasets = function(p1, p2, r1, r2, r12){
   # Make sure its is positive definite
   eigs = eigen(R)
   if(any(eigs$values < 0)){
-    cat("Warning: the correlation matrix is not positive definite. \n")
+    cat("Warning: the correlation matrix is not positive semi-definite. \n")
   }
   eigs$values[eigs$values < 0] = 0
   R = eigs$vectors %*% diag(eigs$values) %*% t(eigs$vectors)
@@ -58,7 +58,7 @@ gen_cor_3datasets = function(p1, p2, p3, r1, r2, r3, r12, r13, r23){
   # Make sure its is positive definite
   eigs = eigen(R)
   if(any(eigs$values < 0)){
-    cat("Warning: correlation matrix is not positive definite. \n")
+    cat("Warning: correlation matrix is not positive semi-definite. \n")
   }
   eigs$values[eigs$values < 0] = 0
   R = eigs$vectors %*% diag(eigs$values) %*% t(eigs$vectors)
@@ -155,7 +155,7 @@ compute_partial_C = function(K_X, K_Y, K_Z) {
   Var_C_XYrZ = (n^2 - n - 4) * Var_C_XY / 2
   
   # Compute the naive partial covariance and theoretical moments
-  nC_XY_Z = (C_XZ * C_YZ) / C_ZZ
+  nC_XY_Z = (C_XZ * C_YZ) / delta2_Z
   E_nC_XY_Z = tr_K_X * tr_K_Y * v_Z / (n-1)^2
   Var_nC_XY_Z = 2 * k * delta2_X * delta2_Y * m_v_Z / (n-1)^3 *
     (2*(n-1)*k*m_v_X*m_v_Y*m_v_Z + m_v_X*v_Y*v_Z + v_X*m_v_Y*v_Z)
