@@ -20,7 +20,7 @@ n_cores = detectCores()
 # -------------------------------------------------
 
 r_w_vec = seq(0, 1, 0.1)
-r_w = r_w_vec[job_id]
+r_w = r_w_vec[job_id+1]
 
 set.seed(1234)
 n = 500
