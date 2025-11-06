@@ -146,7 +146,7 @@ compute_partial_C = function(K_X, K_Y, K_Z) {
   # Kappa
   k = 1 / ((n-2)*(n-1)*(n+1))
   
-  # Compute the partial covariance and theoretical moments
+  # Compute the explained covariance and theoretical moments
   init_c_xy_z = (Cc_XZ * Cc_YZ) / Cc_ZZ
   C_XY_Z = init_c_xy_z + tr_K_X * tr_K_Y / (n-1)
   E_C_XY = tr_K_X * tr_K_Y / (n-1)
@@ -157,7 +157,7 @@ compute_partial_C = function(K_X, K_Y, K_Z) {
   E_C_XYrZ = 0
   Var_C_XYrZ = (n^2 - n - 4) * Var_C_XY / 2
   
-  # Compute the naive partial covariance and theoretical moments
+  # Compute the naive explained covariance and theoretical moments
   nC_XY_Z = (C_XZ * C_YZ) / delta2_Z
   E_nC_XY_Z = tr_K_X * tr_K_Y * v_Z / (n-1)^2
   Var_nC_XY_Z = 2 * k * delta2_X * delta2_Y * m_v_Z / (n-1)^3 *
