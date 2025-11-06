@@ -19,8 +19,8 @@ n_cores = detectCores()
 # Parameters for the experiment
 # -------------------------------------------------
 
-rw_vec = seq(0, 1, 0.1)
-rw = rw_vec[job_id]
+r_w_vec = seq(0, 1, 0.1)
+r_w = r_w_vec[job_id]
 
 set.seed(1234)
 n = 500
