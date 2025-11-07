@@ -87,7 +87,7 @@ for(r_w in r_w_vec){
     # Create the covariance matrix
     R_res = gen_cor_3datasets(p1, p2, p3, r_w, r_w, r_w, r_b1, r_b2, r_b2)
     R_mat = R_res$R_mat
-    semipos_def = R_res$semidef_pos
+    semidef_pos = R_res$semidef_pos
     
     res = mclapply(1:n_test, 
                    function(x) c_results(n, p1, p2, p3, R_mat), 
