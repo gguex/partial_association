@@ -87,7 +87,7 @@ for(r_w in r_w_vec){
     # Create the covariance matrix
     R_res = gen_cor_3datasets(p1, p2, p3, r_w, r_w, r_w, r_b1, r_b2, r_b2)
     R_mat = R_res$R_mat
-    semipos_def = R_res$semidef
+    semipos_def = R_res$semidef_pos
     
     res = mclapply(1:n_test, 
                    function(x) c_results(n, p1, p2, p3, R_mat), 
@@ -104,7 +104,7 @@ for(r_w in r_w_vec){
     df_res$r12 = r_b1
     df_res$r13 = r_b2
     df_res$r23 = r_b2
-    df_res$semipos_def = 1*semipos_def
+    df_res$semidef_pos = 1*semidef_pos
     
     df_all_res = rbind(df_all_res, df_res)
     
@@ -112,5 +112,5 @@ for(r_w in r_w_vec){
 }
 
 # Save the results
-write.csv(df_all_res, paste0("results_csv/res_3kernels_rb1_", r_b1, ".csv"), 
+write.csv(df_all_res, paste0("results_csv/res2_3kernels_rb1_", r_b1, ".csv"), 
           row.names=F)

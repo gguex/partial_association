@@ -149,13 +149,13 @@ compute_partial_C = function(K_X, K_Y, K_Z) {
   # Compute the explained covariance and theoretical moments
   init_c_xy_z = (Cc_XZ * Cc_YZ) / Cc_ZZ
   C_XY_Z = init_c_xy_z + tr_K_X * tr_K_Y / (n-1)
-  E_C_XY = tr_K_X * tr_K_Y / (n-1)
-  Var_C_XY = 4 * k^2 * delta2_X * delta2_Y * m_v_X * m_v_Y 
+  E_C_XY_Z = tr_K_X * tr_K_Y / (n-1)
+  Var_C_XY_Z = 4 * k^2 * delta2_X * delta2_Y * m_v_X * m_v_Y 
   
   # Compute the residual covariance and theoretical moments
   C_XYrZ = Cc_XY - init_c_xy_z
   E_C_XYrZ = 0
-  Var_C_XYrZ = (n^2 - n - 4) * Var_C_XY / 2
+  Var_C_XYrZ = 2*(n^2 - n - 4) * k^2 * delta2_X * delta2_Y * m_v_X * m_v_Y
   
   # Compute the naive explained covariance and theoretical moments
   nC_XY_Z = (C_XZ * C_YZ) / delta2_Z
@@ -167,12 +167,12 @@ compute_partial_C = function(K_X, K_Y, K_Z) {
   nC_XYrZ = C_XY - nC_XY_Z
   E_nC_XYrZ = tr_K_X * tr_K_Y * m_v_Z / (n-1)^2
   Var_nC_XYrZ = 2 * k * delta2_X * delta2_Y / (n-1)^3 *
-    (2*(n-1)*k*m_v_X*m_v_Y*m_v_Z*(m_v_Z - 2*(n-1)) + (n-1)^2*m_v_X*m_v_Y + 
+    (2*(n-1)*k*m_v_X*m_v_Y*m_v_Z*(m_v_Z - 2*(n-1)) + ((n-1)^2)*m_v_X*m_v_Y + 
        (v_X*m_v_Y + m_v_X*v_Y)*v_Z*m_v_Z)
   
   return(list(C_XY_Z = C_XY_Z,
-              E_C_XY_Z = E_C_XY,
-              Var_C_XY_Z = Var_C_XY,
+              E_C_XY_Z = E_C_XY_Z,
+              Var_C_XY_Z = Var_C_XY_Z,
               C_XYrZ = C_XYrZ,
               E_C_XYrZ = E_C_XYrZ,
               Var_C_XYrZ = Var_C_XYrZ,

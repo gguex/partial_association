@@ -78,7 +78,7 @@ for(r_b in r_b_vec){
     # Create the covariance matrix
     R_res = gen_cor_2datasets(p1, p2, r_w, r_w, r_b)
     R_mat = R_res$R_mat
-    semipos_def = R_res$semidef
+    semidef_pos = R_res$semidef_pos
     
     res = mclapply(1:n_test, 
                    function(x) c_results(n, p1, p2, R_mat), 
@@ -91,7 +91,7 @@ for(r_b in r_b_vec){
     df_res$r1 = r_w
     df_res$r2 = r_w
     df_res$r12 = r_b
-    df_res$semipos_def = 1*semipos_def
+    df_res$semidef_pos = 1*semidef_pos
     
     df_all_res = rbind(df_all_res, df_res)
     
