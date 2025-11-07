@@ -15,7 +15,7 @@ r_b1_vec = seq(0, 1, 0.1)
 df = data.frame()
 
 for(r_b1 in r_b1_vec){
-  results_path = paste0("results_csv/res_3kernels_rb1_", r_b1, ".csv")
+  results_path = paste0("results_csv/res2_3kernels_rb1_", r_b1, ".csv")
   temp_df = read_csv(results_path) 
   df = rbind(df, temp_df)
 }
@@ -34,7 +34,7 @@ z_means = df_g1 %>%
   group_by(r1, r13) %>%
   summarise(mean_z = mean(z_score), 
             mean_z_n = mean(z_score_n),
-            semipos_def = max(semipos_def)) %>%
+            semidef_pos = max(semidef_pos)) %>%
   ungroup()
 
 df_g1 %>%
@@ -43,7 +43,7 @@ df_g1 %>%
   geom_vline(data=z_means, 
              aes(xintercept=mean_z), color="red", linetype="dashed", size=1) +
   geom_vline(xintercept=0, color="black", linetype="dotted", size=1) +
-  geom_text(aes(x=mean_z_n, y=0.3, label=ifelse(semipos_def==0, "Not Semi-pos def", "")), 
+  geom_text(aes(x=mean_z_n, y=0.3, label=ifelse(semidef_pos==0, "Not semi-def pos", "")), 
             data=z_means, color="red", vjust=-1) +
   labs(x = "z-score of Dissimilarity Covariance", 
        y = "Density", 
@@ -60,7 +60,7 @@ df_g1 %>%
   geom_vline(data=z_means, 
              aes(xintercept=mean_z_n), color="red", linetype="dashed", size=1) +
   geom_vline(xintercept=0, color="black", linetype="dotted", size=1) +
-  geom_text(aes(x=mean_z_n, y=0.3, label=ifelse(semipos_def==0, "Not Semi-pos def", "")), 
+  geom_text(aes(x=mean_z_n, y=0.3, label=ifelse(semidef_pos==0, "Not semi-def pos", "")), 
             data=z_means, color="red", vjust=-1) +
   labs(x = "z-score of Dissimilarity Covariance", 
        y = "Density", 
@@ -75,6 +75,7 @@ ggsave("results_plot/zscore_histogram_naive_3kernels.png", width=8, height=6)
 
 df_g2 = df %>%
   group_by(r1, r12, r13) %>%
+  filter(semidef_pos==1) %>%
   summarise(mean_z = mean(z_score),
             q5 = quantile(z_score, 0.05),
             q95 = quantile(z_score, 0.95),
@@ -115,11 +116,11 @@ df_g3 %>%
        y = "Mean Dissimilarity Covariance",
        title = "Mean Dissimilarity Covariance vs r_b when r_w = 0.5") +
   scale_fill_discrete(name="Type", labels=c("C_XY|Z", "
-C_XY,rZ")) +
+C_XYrZ")) +
   facet_wrap(~r13, labeller = labeller(
     r13 = function(x) paste0("r_c", "=", x)
   ))
-
+ggsave("results_plot/cov_addition_3kernels.png", width=8, height=6)
 
 
 
