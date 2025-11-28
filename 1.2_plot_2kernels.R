@@ -8,14 +8,14 @@ library(tidyverse)
 
 # --- Parameters
 
-r_b_vec = seq(0, 1, 0.1)
+r_w_vec = c(0, 0.5, 0.9)
 
 # --- Load data
 
 df = data.frame()
 
-for(r_b in r_b_vec){
-  results_path = paste0("results_csv/res_2kernels_rb_", r_b, ".csv")
+for(r_w in r_w_vec){
+  results_path = paste0("results_csv/new_2k_rw_", r_w, ".csv")
   temp_df = read_csv(results_path) 
   df = rbind(df, temp_df)
 }
@@ -42,7 +42,7 @@ df_g1 %>%
        y = "Density", 
        title = "Histogram of z-scores when r_b = 0") +
   facet_wrap(~r1, labeller = labeller(r1 = function(x) paste0("r_w", "=", x) ))
-ggsave("results_plot/zscore_histogram_2kernels.png", width=8, height=6)
+ggsave("results_plot/z_new_histogram_2kernels.png", width=8, height=6)
 
 # --- Graph 1.2
 
@@ -61,5 +61,6 @@ df_g2 %>%
   labs(x = bquote("Correlation between datasets ("~r[b]~")"),
        y = "Mean z-score of Dissimilarity Covariance", 
        title = "Mean z-score of Dissimilarity Covariance vs r_b") +
-  facet_wrap(~r1, labeller = labeller(r1 = function(x) paste0("r_w", "=", x) ))
-ggsave("results_plot/zscore_evo_2kernels.png", width=8, height=6)
+  facet_wrap(~r1, labeller = labeller(r1 = function(x) paste0("r_w", "=", x) ), 
+             scales = "free")
+ggsave("results_plot/z_new_evo_2kernels.png", width=8, height=6)

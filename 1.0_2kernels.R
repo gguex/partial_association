@@ -24,7 +24,7 @@ p1 = 5
 p2 = 5
 n_test = 1000
 r_w_vec = c(0, 0.5, 0.9)
-r_b_vec = seq(0, 1, 0.1)
+n_r_b = 10
 
 # -------------------------------------------------
 # Code
@@ -64,16 +64,19 @@ c_results = function(n, p1, p2, R_mat){
   return(C_res)
 }
 
-for(r_b in r_b_vec){
-  cat("Running for r_b =", r_b, "\n")
-  
+
+for(r_w in r_w_vec){
+
   df_all_res = data.frame()
   
   ### Computations
   
-  for(r_w in r_w_vec){
+  r_b_max = (1 + (p1 - 1)*r_w)/p1
+  r_b_vec = seq(0, r_b_max, length.out=n_r_b)
+  
+  for(r_b in r_b_vec){
     
-    cat("Running for r_w =", r_w, "\n")
+    cat("Running for r_b =", r_b, "; r_w =", r_w, "\n")
     
     # Create the covariance matrix
     R_res = gen_cor_2datasets(p1, p2, r_w, r_w, r_b)
@@ -98,7 +101,7 @@ for(r_b in r_b_vec){
   }
   
   # Save the results
-  write.csv(df_all_res, paste0("results_csv/res_2kernels_rb_", r_b, ".csv"), 
+  write.csv(df_all_res, paste0("results_csv/new_2k_rw_", r_w, ".csv"), 
             row.names=F)
 }
 
