@@ -26,8 +26,11 @@ p2 = 5
 p3 = 5
 n_test = 1000
 r_w_vec = c(0, 0.5, 0.9)
-r_b1_vec = seq(0, 1, 0.1)
-r_b2_vec = c(0, 0.5, 0.9)
+r_c_mat = matrix(c(0, 0.1, 
+                   0, 0.35,
+                   0, 0.6), nrow=3, ncol=2, byrow=TRUE)
+
+n_r_b = 10
 
 # -------------------------------------------------
 # Code
@@ -70,20 +73,25 @@ c_results = function(n, p1, p2, p3, R_mat){
   return(C_res)
 }
 
-for(r_b1 in r_b1_vec){
+for(i in 1:length(r_w_vec)){
   
-  cat("Running for r_b1 =", r_b1, "\n")
+  r_w = r_w_vec[i]
   df_all_res = data.frame()
   
   ### Computations
+  r_c_vec = r_c_mat[i, ]
   
-  for(r_w in r_w_vec){
-    for(r_b2 in r_b2_vec){
+  for(r_c in r_c_vec){
+    
+    r_b_max = (1 + (p1 - 1)*r_w)/p1
+    r_b_vec = seq(0, r_b_max, length.out=n_r_b)
+    
+    for(r_b in r_b_vec){
       
-      cat("Running for r_w =", r_w,", r_b2 =", r_b2, "\n")
+      cat("Running for r_w =", r_w, "; r_c =", r_c,"; r_b =", r_b, "\n")
       
       # Create the covariance matrix
-      R_res = gen_cor_3datasets(p1, p2, p3, r_w, r_w, r_w, r_b1, r_b2, r_b2)
+      R_res = gen_cor_3datasets(p1, p2, p3, r_w, r_w, r_w, r_b, r_c, r_c)
       R_mat = R_res$R_mat
       semidef_pos = R_res$semidef_pos
       
@@ -99,9 +107,9 @@ for(r_b1 in r_b1_vec){
       df_res$r1 = r_w
       df_res$r2 = r_w
       df_res$r3 = r_w
-      df_res$r12 = r_b1
-      df_res$r13 = r_b2
-      df_res$r23 = r_b2
+      df_res$r12 = r_b
+      df_res$r13 = r_c
+      df_res$r23 = r_c
       df_res$semidef_pos = 1*semidef_pos
       
       df_all_res = rbind(df_all_res, df_res)
@@ -110,6 +118,6 @@ for(r_b1 in r_b1_vec){
   }
   
   # Save the results
-  write.csv(df_all_res, paste0("results_csv/res2_3kernels_rb1_", r_b1, ".csv"), 
+  write.csv(df_all_res, paste0("results_csv/new_3k_rw_", r_w, ".csv"), 
             row.names=F)
 }
