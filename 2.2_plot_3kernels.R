@@ -8,14 +8,14 @@ library(tidyverse)
 
 # --- Parameters
 
-r_b1_vec = seq(0, 1, 0.1)
+r_w_vec = c(0, 0.5, 0.9)
 
 # --- Load data
 
 df = data.frame()
 
-for(r_b1 in r_b1_vec){
-  results_path = paste0("results_csv/res2_3kernels_rb1_", r_b1, ".csv")
+for(r_w in r_w_vec){
+  results_path = paste0("results_csv/new_3k_rw_", r_w, ".csv")
   temp_df = read_csv(results_path) 
   df = rbind(df, temp_df)
 }
@@ -48,11 +48,11 @@ df_g1 %>%
   labs(x = "z-score of Dissimilarity Covariance", 
        y = "Density", 
        title = "Histogram of z-scores when r_b = 0") +
-  facet_wrap(~r1+r13, labeller = labeller(
+  facet_wrap(~r13+r1, labeller = labeller(
     r1 = function(x) paste0("r_w", "=", x),
     r13 = function(x) paste0("r_c", "=", x)
   ))
-ggsave("results_plot/zscore_histogram_3kernels.png", width=8, height=6)
+ggsave("results_plot/z_new_histogram_3kernels.png", width=8, height=6)
 
 df_g1 %>%
   ggplot(aes(x=z_score_n)) +
@@ -65,11 +65,11 @@ df_g1 %>%
   labs(x = "z-score of Dissimilarity Covariance", 
        y = "Density", 
        title = "Histogram of 'naive' z-scores when r_b = 0") +
-  facet_wrap(~r1+r13, labeller = labeller(
+  facet_wrap(~r13+r1, labeller = labeller(
     r1 = function(x) paste0("r_w", "=", x),
     r13 = function(x) paste0("r_c", "=", x)
   ))
-ggsave("results_plot/zscore_histogram_naive_3kernels.png", width=8, height=6)
+ggsave("results_plot/z_new_histogram_naive_3kernels.png", width=8, height=6)
 
 # --- Graph 2.2
 
@@ -91,36 +91,37 @@ df_g2 %>%
   labs(x = bquote("Correlation between datasets ("~r[b]~")"),
        y = "Mean z-score of Partial Dissimilarity Covariance", 
        title = "Mean z-score of Partial Dissimilarity Covariance vs r_b") +
-  facet_wrap(~r1+r13, labeller = labeller(
+  facet_wrap(~r13+r1, labeller = labeller(
     r1 = function(x) paste0("r_w", "=", x),
     r13 = function(x) paste0("r_c", "=", x)
-  ))
-ggsave("results_plot/zscore_evo_3kernels.png", width=8, height=6)
+  ), scales = "free")
+ggsave("results_plot/z_new_evo_3kernels.png", width=8, height=6)
 
 # --- Graph 2.3
 
-df_g3 = df %>%
-  filter(r1==0.5) %>%
-  group_by(r12, r13) %>%
-  summarise(mean_C_XY_Z = mean(C_XY_Z),
-            mean_C_XYrZ = mean(C_XYrZ)) %>%
-  ungroup()
+# df_g3 = df %>%
+#   filter(r1==0.5) %>%
+#   group_by(r12, r13) %>%
+#   summarise(mean_C_XY_Z = mean(C_XY_Z),
+#             mean_C_XYrZ = mean(C_XYrZ)) %>%
+#   ungroup()
 
-df_g3 %>%
-  # stack plot
-  pivot_longer(cols=c("mean_C_XY_Z", "mean_C_XYrZ"), 
-               names_to="type", values_to="mean_value") %>%
-  ggplot(aes(x=r12, y=mean_value, fill=type)) +
-  geom_area(position="stack", alpha=0.8) +
-  labs(x = bquote("Correlation between datasets ("~r[b]~")"),
-       y = "Mean Dissimilarity Covariance",
-       title = "Mean Dissimilarity Covariance vs r_b when r_w = 0.5") +
-  scale_fill_discrete(name="Type", labels=c("C_XY|Z", "
-C_XYrZ")) +
-  facet_wrap(~r13, labeller = labeller(
-    r13 = function(x) paste0("r_c", "=", x)
-  ))
-ggsave("results_plot/cov_addition_3kernels.png", width=8, height=6)
+# df_g3 %>%
+#   # stack plot
+#   pivot_longer(cols=c("mean_C_XY_Z", "mean_C_XYrZ"), 
+#                names_to="type", values_to="mean_value") %>%
+#   ggplot(aes(x=r12, y=mean_value, fill=type)) +
+#   geom_area(position="stack", alpha=0.8) +
+#   labs(x = bquote("Correlation between datasets ("~r[b]~")"),
+#        y = "Mean Dissimilarity Covariance",
+#        title = "Mean Dissimilarity Covariance vs r_b when r_w = 0.5") +
+#   scale_fill_discrete(name="Type", labels=c("C_XY|Z", "
+# C_XYrZ")) +
+#   facet_wrap(~r13, labeller = labeller(
+#     r13 = function(x) paste0("r_c", "=", x),
+#     scales = "free"
+#   ))
+# ggsave("results_plot/cov_addition_3kernels.png", width=8, height=6)
 
 
 
