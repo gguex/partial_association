@@ -47,7 +47,7 @@ c_results = function(n, p1, p2, p3, R_mat){
   H = diag(n) - outer(rep(1, n), f)
   
   # Generate the dataset
-  data_sim = mvrnorm(n, mu=rep(0, p1+p2+p3), Sigma=R_mat)
+  data_sim = diag(1/sqrt(f))%*%mvrnorm(n, mu=rep(0, p1+p2+p3), Sigma=R_mat)
   
   # Split the dataset
   X = data_sim[, 1:p1]
