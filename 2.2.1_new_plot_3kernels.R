@@ -82,28 +82,29 @@ df_H1 = df %>%
             q5_p = quantile(zp_score, 0.05),
             q95_p = quantile(zp_score, 0.95),
             mean_zpn = mean(zpn_score),
-            q5_zpn = quantile(zpn_score, 0.05),
-            q95_zpn = quantile(zpn_score, 0.95)) %>%
+            q5_pn = quantile(zpn_score, 0.05),
+            q95_pn = quantile(zpn_score, 0.95)) %>%
   ungroup()
 
 df_H1 %>%
   ggplot() +
-  geom_line(aes(x=sd_A, y=q5), color="Dissimilarity Covariance", alpha=0.4, lty=3, size=1) +
-  geom_line(aes(x=sd_A, y=q95), color="Dissimilarity Covariance", alpha=0.4, lty=3, size=1) +
-  geom_line(aes(x=sd_A, y=mean_z), color="Dissimilarity Covariance", size=1) +
-  geom_line(aes(x=sd_A, y=q5_p), color="red", alpha=0.4, lty=3, size=1) +
-  geom_line(aes(x=sd_A, y=q95_p), color="red", alpha=0.4, lty=3, size=1) +
-  geom_line(aes(x=sd_A, y=mean_zp), color="red", size=1) +
-  geom_line(aes(x=sd_A, y=q5_pn), color="green", alpha=0.4, lty=3, size=1) +
-  geom_line(aes(x=sd_A, y=q95_pn), color="green", alpha=0.4, lty=3, size=1) +
-  geom_line(aes(x=sd_A, y=mean_zpn), color="green", size=1) +
+  geom_line(aes(x=sd_A, y=q5, color="Dissimilarity Covariance"), alpha=0.4, lty=3, size=1) +
+  geom_line(aes(x=sd_A, y=q95, color="Dissimilarity Covariance"), alpha=0.4, lty=3, size=1) +
+  geom_line(aes(x=sd_A, y=mean_z, color="Dissimilarity Covariance"), size=1) +
+  geom_line(aes(x=sd_A, y=q5_p, color="Partial Dissimilarity Covariance"), alpha=0.4, lty=3, size=1) +
+  geom_line(aes(x=sd_A, y=q95_p, color="Partial Dissimilarity Covariance"), alpha=0.4, lty=3, size=1) +
+  geom_line(aes(x=sd_A, y=mean_zp, color="Partial Dissimilarity Covariance"), size=1) +
+  geom_line(aes(x=sd_A, y=q5_pn, color="Partial (naive) Dissimilarity Covariance"), alpha=0.4, lty=3, size=1) +
+  geom_line(aes(x=sd_A, y=q95_pn, color="Partial (naive) Dissimilarity Covariance"), alpha=0.4, lty=3, size=1) +
+  geom_line(aes(x=sd_A, y=mean_zpn, color="Partial (naive) Dissimilarity Covariance"), size=1) +
   labs(x = "Standard deviation of the regression matrix",
        y = "Mean z-score of Dissimilarity Covariance") +
-  scale_color_manual(name="Method", 
-                     values=c("blue", "red", "green"), 
-                     labels=c("Dissimilarity Covariance", 
-                              "Partial Dissimilarity Covariance", 
-                              "Partial (naive) Dissimilarity Covariance")) +
+  scale_color_manual(name="Method",
+                     values=c("Dissimilarity Covariance" = "blue",
+                              "Partial Dissimilarity Covariance" = "red",
+                              "Partial (naive) Dissimilarity Covariance" = "green"),
+  ) +
   facet_wrap(~sd_B, labeller = labeller(
     sd_B = function(x) paste0("sd_B", "=", x)
   ), scales = "free")
+ggsave("results_plot/nexp_H1_3k.png", width=10, height=6)
