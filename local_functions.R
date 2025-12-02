@@ -4,6 +4,8 @@
 # ----------------------------------------------------
 # ----------------------------------------------------
 
+library(MASS)
+
 # --------------------------------------------
 # Generate the correlation matrix 
 # for 2 sets of variables 
@@ -32,6 +34,55 @@ gen_cor_2datasets = function(p1, p2, r1, r2, r12){
   }
   
   return(list(R_mat=R_mat, semidef_pos=semidef_pos))
+}
+
+# --------------------------------------------
+# Generate 2 sets of variables linked by 
+# a regression formulae
+# --------------------------------------------
+
+gen_2datasets = function(n, f, p1, p2, m_A, sd_A, sd_E){
+  
+  # Generate the first dataset
+  X = matrix(rnorm(n*p1), nrow=n, ncol=p1)
+  
+  # Create the regression coefficients
+  A = matrix(rnorm(p1*p2, mean=m_A, sd=sd_A), nrow=p1, ncol=p2)
+  
+  # Create the second dataset
+  Y = X %*% A + matrix(rnorm(n*p2, mean=0, sd=sd_E), nrow=n, ncol=p2)
+  
+  # Bind the datasets and weight the individuals
+  data_mat = diag(1/sqrt(f))%*%cbind(X, Y)
+  
+  # Return it
+  return(data_mat)
+}
+
+# --------------------------------------------
+# Generate 3 sets of variables linked by 
+# a regression formulae
+# --------------------------------------------
+
+gen_3datasets = function(n, f, p1, p2, p3, m_A, sd_A, m_B, sd_B, sd_E){
+  
+  # Generate the dependent dataset
+  Z = matrix(rnorm(n*p3), nrow=n, ncol=p3)
+  
+  # Generate the first dataset with regression on Z
+  X = Z %*% matrix(rnorm(p3*p1, mean=m_B, sd=sd_B), nrow=p3, ncol=p1) + 
+    matrix(rnorm(n*p1, mean=0, sd=sd_E), nrow=n, ncol=p1)
+  
+  # Generate the second dataset with a regression on Z and X
+  Y = X %*% matrix(rnorm(p1*p2, mean=m_A, sd=sd_A), nrow=p1, ncol=p2) + 
+    Z %*% matrix(rnorm(p3*p2, mean=m_B, sd=sd_B), nrow=p3, ncol=p2) + 
+    matrix(rnorm(n*p2, mean=0, sd=sd_E), nrow=n, ncol=p2)
+  
+  # Bind the datasets and weight the individuals
+  data_mat = diag(1/sqrt(f))%*%cbind(X, Y, Z)
+  
+  # Return it
+  return(data_mat)
 }
 
 # --------------------------------------------
