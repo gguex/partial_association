@@ -1,0 +1,110 @@
+# ----------------------------------------------------
+# ----------------------------------------------------
+# Plot the results for 3 kernels
+# ----------------------------------------------------
+# ----------------------------------------------------
+
+library(tidyverse)
+library(gridExtra)
+
+results_path = "results_csv/nexp_3k_v2.csv"
+
+df = read_csv(results_path) 
+
+# --- Load data
+
+df = df %>%
+  mutate(z_score = (C_XY -E_C_XY)/sqrt(Var_C_XY),
+         zp_score = (C_XYrZ -E_C_XYrZ)/sqrt(Var_C_XYrZ),
+         zpn_score = (nC_XYrZ - E_nC_XYrZ)/sqrt(Var_nC_XYrZ))
+  
+  
+# --- Graph H0
+
+df_H0 = df %>%
+  filter(sd_A==0)
+
+z_means = df_H0 %>%
+  group_by(sd_B) %>%
+  summarise(mean_z = mean(z_score),
+            mean_zp = mean(zp_score), 
+            mean_zpn = mean(zpn_score)) %>%
+  ungroup()
+
+g1 = df_H0 %>%
+  ggplot(aes(x=z_score)) +
+  geom_histogram(aes(y=..density..), bins=30, fill="lightblue", color="black") +
+  geom_vline(data=z_means, 
+             aes(xintercept=mean_z), color="red", linetype="dashed", size=1) +
+  geom_vline(xintercept=0, color="black", linetype="dotted", size=1) +
+  labs(x = "z-score of Dissimilarity Covariance", 
+       y = "Density") +
+  facet_wrap(~sd_B, labeller = labeller(
+    sd_B = function(x) paste0("b", "=", x),
+  ))
+
+g2 = df_H0 %>%
+  ggplot(aes(x=zp_score)) +
+  geom_histogram(aes(y=..density..), bins=30, fill="lightblue", color="black") +
+  geom_vline(data=z_means, 
+             aes(xintercept=mean_zp), color="red", linetype="dashed", size=1) +
+  geom_vline(xintercept=0, color="black", linetype="dotted", size=1) +
+  labs(x = "z-score of Partial Dissimilarity Covariance", 
+       y = "Density") +
+  facet_wrap(~sd_B, labeller = labeller(
+    sd_B = function(x) paste0("b", "=", x),
+  ))
+
+g3 = df_H0 %>%
+  ggplot(aes(x=zpn_score)) +
+  geom_histogram(aes(y=..density..), bins=30, fill="lightblue", color="black") +
+  geom_vline(data=z_means, 
+             aes(xintercept=mean_zpn), color="red", linetype="dashed", size=1) +
+  geom_vline(xintercept=0, color="black", linetype="dotted", size=1) +
+  labs(x = "z-score of Plain Partial Dissimilarity Covariance", 
+       y = "Density") +
+  facet_wrap(~sd_B, labeller = labeller(
+    sd_B = function(x) paste0("b", "=", x),
+  ))
+
+# Plot the 3 graphs in one figure
+g_all = grid.arrange(g1, g2, g3, nrow=3)
+ggsave("results_plot/nexp_H0_3k_v2.png", g_all, width=8, height=8)
+
+# --- Graph H1
+
+df_H1 = df %>%
+  group_by(sd_B, sd_A) %>%
+  summarise(mean_z = mean(z_score),
+            q5 = quantile(z_score, 0.05),
+            q95 = quantile(z_score, 0.95),
+            mean_zp = mean(zp_score),
+            q5_p = quantile(zp_score, 0.05),
+            q95_p = quantile(zp_score, 0.95),
+            mean_zpn = mean(zpn_score),
+            q5_pn = quantile(zpn_score, 0.05),
+            q95_pn = quantile(zpn_score, 0.95)) %>%
+  ungroup()
+
+df_H1 %>%
+  ggplot() +
+  geom_line(aes(x=sd_A, y=q5, color="Dissimilarity Covariance"), alpha=0.4, lty=3, size=1) +
+  geom_line(aes(x=sd_A, y=q95, color="Dissimilarity Covariance"), alpha=0.4, lty=3, size=1) +
+  geom_line(aes(x=sd_A, y=mean_z, color="Dissimilarity Covariance"), size=1) +
+  geom_line(aes(x=sd_A, y=q5_p, color="Partial Dissimilarity Covariance"), alpha=0.4, lty=3, size=1) +
+  geom_line(aes(x=sd_A, y=q95_p, color="Partial Dissimilarity Covariance"), alpha=0.4, lty=3, size=1) +
+  geom_line(aes(x=sd_A, y=mean_zp, color="Partial Dissimilarity Covariance"), size=1) +
+  geom_line(aes(x=sd_A, y=q5_pn, color="Plain Partial Dissimilarity Covariance"), alpha=0.4, lty=3, size=1) +
+  geom_line(aes(x=sd_A, y=q95_pn, color="Plain Partial Dissimilarity Covariance"), alpha=0.4, lty=3, size=1) +
+  geom_line(aes(x=sd_A, y=mean_zpn, color="Plain Partial Dissimilarity Covariance"), size=1) +
+  labs(x = "a",
+       y = "Mean z-score") +
+  scale_color_manual(name="Method",
+                     values=c("Dissimilarity Covariance" = "blue",
+                              "Partial Dissimilarity Covariance" = "red",
+                              "Plain Partial Dissimilarity Covariance" = "green"),
+  ) +
+  facet_wrap(~sd_B, labeller = labeller(
+    sd_B = function(x) paste0("b", "=", x)
+  ), scales = "free")
+ggsave("results_plot/nexp_H1_3k_v2.png", width=10, height=6)

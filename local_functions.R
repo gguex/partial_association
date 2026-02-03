@@ -86,6 +86,44 @@ gen_3datasets = function(n, f, p1, p2, p3, m_A, sd_A, m_B, sd_B, sd_E){
 }
 
 # --------------------------------------------
+# Generate 3 sets of variables linked by 
+# a regression formulae v2
+# --------------------------------------------
+
+gen_3datasets_v2 = function(n, f, p1, p2, p3, cor_W, m_A, sd_A, m_B, sd_B){
+  
+  # Generate Sigmas 
+  Sigma_X = matrix(cor_W, nrow=p1, ncol=p1)
+  diag(Sigma_X) = 1
+  Sigma_Y = matrix(cor_W, nrow=p2, ncol=p2)
+  diag(Sigma_Y) = 1
+  Sigma_Z = matrix(cor_W, nrow=p3, ncol=p3)
+  diag(Sigma_Z) = 1
+  
+    
+  # Generate the 3 datasets
+  X_0 = mvrnorm(n, mu=rep(0, p1), Sigma=Sigma_X)
+  Y_0 = mvrnorm(n, mu=rep(0, p2), Sigma=Sigma_Y)
+  Z = mvrnorm(n, mu=rep(0, p3), Sigma=Sigma_Z)
+  
+  
+  # Generate the first dataset with regression on Z
+  X = Z %*% matrix(rnorm(p3*p1, mean=m_B, sd=sd_B), nrow=p3, ncol=p1) + 
+    X_0
+  
+  # Generate the second dataset with a regression on Z and X
+  Y = X %*% matrix(rnorm(p1*p2, mean=m_A, sd=sd_A), nrow=p1, ncol=p2) + 
+    Z %*% matrix(rnorm(p3*p2, mean=m_B, sd=sd_B), nrow=p3, ncol=p2) + 
+    Y_0
+  
+  # Bind the datasets and weight the individuals
+  data_mat = diag(1/sqrt(f))%*%cbind(X, Y, Z)
+  
+  # Return it
+  return(data_mat)
+}
+
+# --------------------------------------------
 # Generate the correlation matrix 
 # for 3 sets of variables 
 # --------------------------------------------
